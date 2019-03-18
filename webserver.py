@@ -27,30 +27,32 @@ class Server():
 
     def make_response(self, body):
         return 'HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}'.format(len(body), body)
+
+    def readFile(self):
+        with open('htmlFile.html') as f:
+            contents = f.read()
+        return contents
     
     def start(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
             s.listen()
             prevResponse = ''
-            print('here1')
-            
+                    
             while True:
                 conn, addr = s.accept()
-                print('here2')
-                                        
+                                                
                 with conn:
                     newReception = conn.recv(1024).decode('utf-8')
-                    print('newReception:', newReception)
                     requestParsed = self.parseHTTP(newReception)
                     handler = self.findHandlerForPath(requestParsed)
-                    if handler == None:
-                        response = prevResponse
-                    else:
-                        response = handler(self, None)
-                        prevResponse = response
+                    response = self.make_response(self.readFile())
+                    #if handler == None:
+                        #response = prevResponse
+                    #else:
+                        #response = handler(self, None)
+                        #prevResponse = response
                     conn.sendall(response.encode('utf-8'))
-                print('here3')
                 
 def handle_bar(server, req):
     return server.make_response("My name is bar")
